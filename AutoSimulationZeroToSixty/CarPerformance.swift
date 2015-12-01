@@ -1,5 +1,5 @@
 print("Swiftstub Running XCode 7.1 Swift 2 - Auto Performance Simulation Program")
-// Coded at http://swiftstub.com/274463480
+// Coded at http://swiftstub.com/88280810
 // By: Yogi Grantz - Car Enthusiast, .NET Developer, C# Nuts, Learning Swift :)
 
 class Kinematics {
