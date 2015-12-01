@@ -8,19 +8,24 @@ class Kinematics {
     var RedLineRPM = Double(0.0);
     var ClutchedRPM = Double(0.0);
     var WheelDiameter = Double(0.0);
-    var TireProfile = Double(0.0);
     var TireWidth = Double(0.0);
+    var TireProfile = Double(0.0);
+    var ArmLength = Double(0.0);
     var GearRatios = [Double](count:5, repeatedValue: 0.0);
     var FinalDriveRatio = Double(0.0);
     var CoeffOfFriction = Double(0.0);
     var Make = String("");
     
+
     // Assuming constant Torque;
     func ZeroToSixty() {
-        //var a = Double(0.0);
+        var arm = 0.0;
+        arm = WheelDiameter / 2.0 / 12.0;
+        arm += self.TireWidth / 25.4 / 12.0 * self.TireProfile / 100;
+        self.ArmLength = arm;
         var v = Double(0.0);
         var rpm = Double(0.0);
-        let dt = Double(0.05);
+        let dt = Double(0.10);
         var t = Double(0.0);
         var gearShift = 0;
         var slipClutch = "";
@@ -29,7 +34,7 @@ class Kinematics {
             if (rpm > RedLineRPM) {
                 gearShift += 1;
             }
-            rpm = v * GearRatios[gearShift] * FinalDriveRatio * 60.0 / (2 * 3.1415296 * ArmLength());
+            rpm = v * GearRatios[gearShift] * FinalDriveRatio * 60.0 / (2 * 3.1415296 * ArmLength);
             if (rpm < ClutchedRPM) {
                 rpm = ClutchedRPM;
                 slipClutch = " - partial clutch"
@@ -44,25 +49,17 @@ class Kinematics {
         
     }
     
-    // Arm Length in ft.
-    func ArmLength() -> Double {
-        var arm = 0.0;
-        arm = WheelDiameter / 2.0 / 12.0;
-        arm += TireWidth / 25.4 / 12.0 * TireProfile / 100;
-        return arm;
-    }
-    
     // Thrust in lbs.
     func Thrust(let gearRatio:Double) -> Double {
         var force = 0.0;
-        force = MaxTorque / ArmLength() * gearRatio * FinalDriveRatio * CoeffOfFriction;
+        force = self.MaxTorque / self.ArmLength * gearRatio * self.FinalDriveRatio * self.CoeffOfFriction;
         return force;
     }
     
     // Acceleration in ft/s2
     func Acceleration(let gearRatio:Double) -> Double {
         var a = 0.0;
-        a = Thrust(gearRatio) / (Weight / 32.174);
+        a = self.Thrust(gearRatio) / (self.Weight / 32.174);
         return a;
     }
     
