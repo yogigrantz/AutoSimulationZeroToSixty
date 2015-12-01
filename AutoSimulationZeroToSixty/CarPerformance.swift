@@ -7,42 +7,44 @@ class Kinematics {
     var MaxTorque = Double(0.0);
     var RedLineRPM = Double(0.0);
     var ClutchedRPM = Double(0.0);
+    var CurRPM = Double(0.0);
     var WheelDiameter = Double(0.0);
-    var TireWidth = Double(0.0);
     var TireProfile = Double(0.0);
-    var ArmLength = Double(0.0);
+    var TireWidth = Double(0.0);
     var GearRatios = [Double](count:5, repeatedValue: 0.0);
     var FinalDriveRatio = Double(0.0);
     var CoeffOfFriction = Double(0.0);
     var Make = String("");
-    
-
+    var ArmLength = Double(0.0);
     // Assuming constant Torque;
     func ZeroToSixty() {
-        var arm = 0.0;
-        arm = WheelDiameter / 2.0 / 12.0;
-        arm += self.TireWidth / 25.4 / 12.0 * self.TireProfile / 100;
-        self.ArmLength = arm;
+        //var a = Double(0.0);
         var v = Double(0.0);
         var rpm = Double(0.0);
         let dt = Double(0.10);
         var t = Double(0.0);
         var gearShift = 0;
         var slipClutch = "";
+        var arm = 0.0;
+        arm = WheelDiameter / 2.0 / 12.0;
+        arm += TireWidth / 25.4 / 12.0 * TireProfile / 100;  
+        // Arm Length in ft.
+        self.ArmLength = arm;
         while (v < 60 * 5280.0 / 3600.0) 
         {
             if (rpm > RedLineRPM) {
                 gearShift += 1;
             }
-            rpm = v * GearRatios[gearShift] * FinalDriveRatio * 60.0 / (2 * 3.1415296 * ArmLength);
-            if (rpm < ClutchedRPM) {
-                rpm = ClutchedRPM;
+            rpm = v * self.GearRatios[gearShift] * self.FinalDriveRatio * 60.0 / (2 * 3.1415296 * self.ArmLength);
+            if (rpm < self.ClutchedRPM) {
+                rpm = self.ClutchedRPM;
                 slipClutch = " - partial clutch"
             }
             else {
                 slipClutch = "";
             }
-            v += Acceleration(GearRatios[gearShift]) * dt;
+            self.CurRPM = rpm
+            v += self.Acceleration(self.GearRatios[gearShift]) * dt;
             t += dt;
             print (String(format:"%.02f",t) + " s: " + String(format:"%.02f", v * 3600 / 5280) + " mph @ " + String(format:"%.00f",rpm) + " RPM, Gear: " + String(gearShift + 1) + " " + slipClutch);
         }
@@ -52,7 +54,7 @@ class Kinematics {
     // Thrust in lbs.
     func Thrust(let gearRatio:Double) -> Double {
         var force = 0.0;
-        force = self.MaxTorque / self.ArmLength * gearRatio * self.FinalDriveRatio * self.CoeffOfFriction;
+        force = ((self.RedLineRPM - self.CurRPM) / (self.RedLineRPM - ClutchedRPM) * 0.2 + 0.8) * self.MaxTorque / self.ArmLength * gearRatio * self.FinalDriveRatio * self.CoeffOfFriction;
         return force;
     }
     
@@ -75,7 +77,7 @@ k.ClutchedRPM = 3700;
 k.WheelDiameter = 15;
 k.TireWidth = 235;
 k.TireProfile = 60
-k.GearRatios = [3.9, 3.2, 2.3, 1.2, 0.78];
+k.GearRatios = [3.9, 3.2, 2.3, 1.5, 0.98];
 k.FinalDriveRatio = 2.71;
 k.CoeffOfFriction = 0.8;
 
