@@ -32,7 +32,7 @@ class Kinematics {
         self.ArmLength = arm;
         while (v < 60 * 5280.0 / 3600.0) 
         {
-            if (rpm > RedLineRPM) {
+            if (rpm > self.RedLineRPM) {
                 gearShift += 1;
             }
             rpm = v * self.GearRatios[gearShift] * self.FinalDriveRatio * 60.0 / (2 * 3.1415296 * self.ArmLength);
